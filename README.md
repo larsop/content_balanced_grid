@@ -13,10 +13,13 @@ create table topo_ar5.cell_ad( id serial, geo geometry(Geometry,4258));
 
 ##Then we call this function and insert the result from func_grid.content_based_balanced_grid save the result into given table.
 
-Parameter 1 : An array of tables names and the name of geometry columns.
-The table name must contain both schema and table name, The geometry column name must follow with one single space after the table name.
+Parameter 1 : ARRAY['org_ar5.ar5_flate geo']
+- An array of tables names and the name of geometry columns.
+The table name must contain both schema and table name, The geometry column name must follow with one single space after the table name. In this case work on table org_ar5.ar5_flate
 
-Parameter 2 : max_rows this is the max number rows that intersects with box before it's split into 4 new boxes 
+Parameter 2 : 4000
+- Max_rows this is the max number rows that intersects with box before it's split into 4 new boxes 
+In this case we max 4000 rows bb that touches ecah cell 
 
 ```
 INSERT INTO func_grid.cell_test(geo) 
