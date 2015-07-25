@@ -11,7 +11,20 @@ For a exaample of usage look at page 18-23 at http://www.slideshare.net/laopsahl
 create table topo_ar5.cell_ad( id serial, geo geometry(Geometry,4258));
 ```
 
-##Then we call this function with given parameters and inserts the result into this table.
-Parameters 1 : An array of tables names and the name of geometry columns.
+##Then we call this function and insert the result from func_grid.content_based_balanced_grid save the result into given table.
 
+Parameter 1 : An array of tables names and the name of geometry columns.
+The table name must contain both schema and table name, The geometry column name must follow with one single space after the table name.
+
+Parameter 2 : max_rows this is the max number rows that intersects with box before it's split into 4 new boxes 
+
+```
+INSERT INTO func_grid.cell_test(geo) 
+SELECT q_grid.cell::geometry(geometry,4258)  as geo 
+FROM (
+SELECT(ST_Dump(
+func_grid.content_based_balanced_grid(ARRAY['org_ar5.ar5_flate geo'],4000))
+).geom AS cell) AS q_grid;
+
+```
 
