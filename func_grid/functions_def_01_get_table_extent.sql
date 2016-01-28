@@ -20,6 +20,7 @@ $body$
 DECLARE
 	grid_geom geometry;
 	grid_geom_tmp geometry;	
+	grid_geom_estimated box2d;	
 	line VARCHAR;
 	line_values VARCHAR[];
 	line_schema_table VARCHAR[];
@@ -52,16 +53,36 @@ BEGIN
 --		raise NOTICE 'execute sql: %',sql;
 		EXECUTE sql INTO source_srid ;
 
+		BEGIN
+			sql := 'SELECT ST_EstimatedExtent('''|| 	schema_name || ''', ''' || table_name || ''', ''' || geo_column_name || ''')';
+	--		raise NOTICE 'execute sql: %',sql;
+			EXECUTE sql INTO grid_geom_estimated ;
+        EXCEPTION WHEN internal_error THEN
+        -- ERROR:  XX000: stats for "edge_data.geom" do not exist
+        -- Catch error and return a return null ant let application decide what to do
+        END;
+	
+
+		IF grid_geom_estimated IS null THEN
+			sql :=  'SELECT ST_SetSRID(ST_Extent(' || geo_column_name ||'),' || source_srid || ') FROM ' || schema_table_name; 
+	    	raise NOTICE 'execute sql: %',sql;
+			EXECUTE sql INTO  grid_geom_tmp;
+		ELSE
+			grid_geom_tmp :=  ST_SetSRID(box2d(grid_geom_estimated)::geometry, source_srid);
+			--SELECT ST_SetSRID(ST_Extent(grid_geom_tmp), source_srid) INTO grid_geom_tmp ;
+
+		END IF;
+
 		
-		sql :=  'SELECT ST_SetSRID(ST_Extent(' || geo_column_name ||'),' || source_srid || ') FROM ' || schema_table_name; 
---    	raise NOTICE 'execute sql: %',sql;
-		EXECUTE sql INTO  grid_geom_tmp;
+		 
 		  
 		IF grid_geom IS null THEN
 			grid_geom := ST_SetSRID(ST_Extent(grid_geom_tmp), source_srid);
 		ELSE
 			grid_geom := ST_SetSRID(ST_Extent(ST_Union(grid_geom, grid_geom_tmp)), source_srid);
 		END IF;
+		
+		raise NOTICE 'grid_geom: %',ST_AsText(grid_geom);
 		
 	END LOOP;
 
