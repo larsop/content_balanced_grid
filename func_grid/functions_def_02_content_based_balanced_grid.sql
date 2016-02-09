@@ -1,6 +1,6 @@
 
 
---DROP FUNCTION func_grid.content_based_balanced_grid(table_name_column_name_array VARCHAR[], 
+--DROP FUNCTION cbg_content_based_balanced_grid(table_name_column_name_array VARCHAR[], 
 --													grid_geom_in geometry,
 --													min_distance integer,
 --													max_rows integer);
@@ -24,7 +24,7 @@
 -- max_rows this is the max number rows that intersects with box before it's split into 4 new boxes 
 
 
-CREATE OR REPLACE FUNCTION func_grid.content_based_balanced_grid (	
+CREATE OR REPLACE FUNCTION cbg_content_based_balanced_grid (	
 													table_name_column_name_array VARCHAR[], 
 													grid_geom_in geometry,
 													min_distance integer,
@@ -71,7 +71,7 @@ BEGIN
 
 	-- if now extent is craeted for given table just do it.
 	IF ST_Area(grid_geom_in) = 0 THEN 
-		grid_geom := func_grid.get_table_extent(table_name_column_name_array);
+		grid_geom := cbg_get_table_extent(table_name_column_name_array);
 		--RAISE NOTICE 'Create new grid geom  %', ST_AsText(grid_geom);
 	ELSE 
 		grid_geom := grid_geom_in;
@@ -104,7 +104,7 @@ BEGIN
 		|| 'ST_MakeEnvelope(' || x_min || ',' || y_min || ',' || x_max || ',' || y_max || ',' || source_srid || ')';
 
 
-		--	raise NOTICE 'execute sql: %',sql;
+		raise NOTICE 'execute sql: %',sql;
 		EXECUTE sql INTO num_rows_table_tmp ;
 		
 		num_rows_table := num_rows_table +  num_rows_table_tmp;
@@ -125,16 +125,16 @@ BEGIN
 
 
 		-- sw
-		sectors[0] := func_grid.content_based_balanced_grid(table_name_column_name_array,ST_MakeEnvelope(x_min,y_min,x_center,y_center, ST_SRID(grid_geom)), min_distance, max_rows);
+		sectors[0] := cbg_content_based_balanced_grid(table_name_column_name_array,ST_MakeEnvelope(x_min,y_min,x_center,y_center, ST_SRID(grid_geom)), min_distance, max_rows);
 
 		-- se
-		sectors[1] := func_grid.content_based_balanced_grid(table_name_column_name_array,ST_MakeEnvelope(x_center,y_min,x_max,y_center, ST_SRID(grid_geom)), min_distance, max_rows);
+		sectors[1] := cbg_content_based_balanced_grid(table_name_column_name_array,ST_MakeEnvelope(x_center,y_min,x_max,y_center, ST_SRID(grid_geom)), min_distance, max_rows);
 	
 		-- ne
-		sectors[2] := func_grid.content_based_balanced_grid(table_name_column_name_array,ST_MakeEnvelope(x_min,y_center,x_center,y_max, ST_SRID(grid_geom)), min_distance, max_rows);
+		sectors[2] := cbg_content_based_balanced_grid(table_name_column_name_array,ST_MakeEnvelope(x_min,y_center,x_center,y_max, ST_SRID(grid_geom)), min_distance, max_rows);
 
 		-- se
-		sectors[3] := func_grid.content_based_balanced_grid(table_name_column_name_array,ST_MakeEnvelope(x_center,y_center,x_max,y_max, ST_SRID(grid_geom)), min_distance, max_rows);
+		sectors[3] := cbg_content_based_balanced_grid(table_name_column_name_array,ST_MakeEnvelope(x_center,y_center,x_max,y_max, ST_SRID(grid_geom)), min_distance, max_rows);
 
 	END IF;
 
@@ -151,7 +151,7 @@ LANGUAGE 'plpgsql';
 -- Parameter 2 : max_rows this is the max number rows that intersects with box before it's split into 4 new boxes 
 
 
-CREATE OR REPLACE FUNCTION func_grid.content_based_balanced_grid (
+CREATE OR REPLACE FUNCTION cbg_content_based_balanced_grid (
 													table_name_column_name_array VARCHAR[],
 													max_rows integer) 
 													RETURNS geometry  AS
@@ -164,7 +164,7 @@ grid_geom geometry := ST_GeomFromText('POINT(0 0)');
 min_distance integer := 1000;
 
 BEGIN
-	return func_grid.content_based_balanced_grid(
+	return cbg_content_based_balanced_grid(
 		table_name_column_name_array,
 		grid_geom, 
 		min_distance,

@@ -1,21 +1,14 @@
--- create a separate schema where we place this func
-CREATE SCHEMA func_grid ;
-
-
 
 -- example of how to use
--- select ST_Area(func_grid.get_table_extent(ARRAY['org_esri_union.table_1 geo_1', 'org_esri_union.table_2 geo_2']));
--- select ST_Area(func_grid.get_table_extent(ARRAY['org_ar5.ar5_flate geo']));
-
-  
-DROP FUNCTION func_grid.get_table_extent(schema_table_name_column_name_array VARCHAR[]) cascade;
+-- select ST_Area(cbg_get_table_extent(ARRAY['org_esri_union.table_1 geo_1', 'org_esri_union.table_2 geo_2']));
+-- select ST_Area(cbg_get_table_extent(ARRAY['org_ar5.ar5_flate geo']));
 
 -- Return the bounding box for given list of arrayes with table name and geo column name 
 -- The table name must contain both schema and tablename 
 -- The geo column name must follow with one single space after the table name.
 -- Does not handle tables with different srid
 
-CREATE OR REPLACE FUNCTION func_grid.get_table_extent (schema_table_name_column_name_array VARCHAR[]) RETURNS geometry  AS
+CREATE OR REPLACE FUNCTION cbg_get_table_extent (schema_table_name_column_name_array VARCHAR[]) RETURNS geometry  AS
 $body$
 DECLARE
 	grid_geom geometry;
