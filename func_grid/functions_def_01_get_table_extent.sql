@@ -47,6 +47,9 @@ BEGIN
 		EXECUTE sql INTO source_srid ;
 
 		BEGIN
+			sql := format('ANALYZE %s',schema_table_name);
+			EXECUTE sql;
+			
 			sql := 'SELECT ST_EstimatedExtent('''|| 	schema_name || ''', ''' || table_name || ''', ''' || geo_column_name || ''')';
 	--		raise NOTICE 'execute sql: %',sql;
 			EXECUTE sql INTO grid_geom_estimated ;
