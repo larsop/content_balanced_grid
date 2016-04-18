@@ -144,6 +144,13 @@ END;
 $body$
 LANGUAGE 'plpgsql';
 
+-- Grant so all can use it
+GRANT EXECUTE ON FUNCTION cbg_content_based_balanced_grid (	
+													table_name_column_name_array VARCHAR[], 
+													grid_geom_in geometry,
+													min_distance integer,
+													max_rows integer) to public;
+
 
 -- Function with default values called with 2 parameters
 -- Parameter 1 : An array of tables names and the name of geometry columns.
@@ -174,4 +181,6 @@ $body$
 LANGUAGE 'plpgsql';
 
 
+-- Grant so all can use it
+GRANT EXECUTE ON FUNCTION cbg_content_based_balanced_grid (table_name_column_name_array VARCHAR[],max_rows integer) to public;
 

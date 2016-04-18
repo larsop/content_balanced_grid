@@ -3,6 +3,13 @@ cat functions_def_0* | psql sl
 
 - How to use code, start up psql
 
+- You may need to grant some data to public if you are running as non  privileged user
+GRANT EXECUTE ON FUNCTION Find_SRID(varchar, varchar, varchar)  to PUBLIC;
+GRANT SELECT ON geometry_columns to PUBLIC;
+GRANT SELECT ON geography_columns TO PUBLIC;
+
+
+
 
 -- crate a table that can hold the result
 [local] lop@sl=#create table cbg_cell_test( id serial, geo geometry(Geometry,4258));
@@ -20,3 +27,4 @@ FROM (
 SELECT(ST_Dump(
 cbg_content_based_balanced_grid(ARRAY['org_ar5.ar5_flate geo'],4000))
 ).geom AS cell) AS q_grid;
+

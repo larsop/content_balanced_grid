@@ -89,4 +89,5 @@ END;
 $body$
 LANGUAGE 'plpgsql';
 
-
+-- Grant so all can use it
+GRANT EXECUTE ON FUNCTION cbg_get_table_extent (schema_table_name_column_name_array VARCHAR[]) to PUBLIC;
