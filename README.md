@@ -26,7 +26,7 @@ INSERT INTO func_grid.cell_test(geo)
 SELECT q_grid.cell::geometry(geometry,4258)  as geo 
 FROM (
 SELECT(ST_Dump(
-func_grid.content_based_balanced_grid(ARRAY['org_ar5.ar5_flate geo'],4000))
+cbg_content_based_balanced_grid(ARRAY['org_ar5.ar5_flate geo'],4000))
 ).geom AS cell) AS q_grid;
 
 ```
