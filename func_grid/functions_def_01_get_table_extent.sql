@@ -46,19 +46,20 @@ BEGIN
 --		raise NOTICE 'execute sql: %',sql;
 		EXECUTE sql INTO source_srid ;
 
-		BEGIN
-			sql := format('ANALYZE %s',schema_table_name);
-			EXECUTE sql;
-			
-			sql := 'SELECT ST_EstimatedExtent('''|| 	schema_name || ''', ''' || table_name || ''', ''' || geo_column_name || ''')';
-	--		raise NOTICE 'execute sql: %',sql;
-			EXECUTE sql INTO grid_geom_estimated ;
-        EXCEPTION WHEN internal_error THEN
+--		BEGIN
+--			sql := format('ANALYZE %s',schema_table_name);
+--			raise NOTICE 'execute sql: %',sql;
+--			EXECUTE sql;
+--			sql := 'SELECT ST_EstimatedExtent('''|| 	schema_name || ''', ''' || table_name || ''', ''' || geo_column_name || ''')';
+--			raise NOTICE 'execute sql: %',sql;
+--			EXECUTE sql INTO grid_geom_estimated ;
+--			raise NOTICE 'grid_geom_estimated: %',grid_geom_estimated;
+--        EXCEPTION WHEN internal_error THEN
         -- ERROR:  XX000: stats for "edge_data.geom" do not exist
         -- Catch error and return a return null ant let application decide what to do
-        END;
-	
+--        END;
 
+  
 		IF grid_geom_estimated IS null THEN
 			sql :=  'SELECT ST_SetSRID(ST_Extent(' || geo_column_name ||'),' || source_srid || ') FROM ' || schema_table_name; 
 	    	raise NOTICE 'execute sql: %',sql;
@@ -69,12 +70,11 @@ BEGIN
 
 		END IF;
 
-		
-		 
-		  
+		-- first time grid_geom is null
 		IF grid_geom IS null THEN
 			grid_geom := ST_SetSRID(ST_Extent(grid_geom_tmp), source_srid);
 		ELSE
+		-- second time take in account tables before
 			grid_geom := ST_SetSRID(ST_Extent(ST_Union(grid_geom, grid_geom_tmp)), source_srid);
 		END IF;
 		
