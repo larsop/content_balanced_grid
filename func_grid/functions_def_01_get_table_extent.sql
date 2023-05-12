@@ -6,7 +6,7 @@
 -- Return the bounding box for given list of arrayes with table name and geo column name 
 -- The table name must contain both schema and tablename 
 -- The geo column name must follow with one single space after the table name.
--- Does not handle tables with different srid
+-- Does now handle tables with different srid
 
 CREATE OR REPLACE FUNCTION cbg_get_table_extent (schema_table_name_column_name_array VARCHAR[]) RETURNS geometry  AS
 $body$
@@ -23,6 +23,8 @@ DECLARE
 	schema_name VARCHAR := 'org_ar5';
 	table_name VARCHAR := 'ar5_flate';
 	sql VARCHAR;
+	
+	global_srid int = 4326;
 
 BEGIN
 
@@ -67,15 +69,17 @@ BEGIN
 		ELSE
 			grid_geom_tmp :=  ST_SetSRID(box2d(grid_geom_estimated)::geometry, source_srid);
 			--SELECT ST_SetSRID(ST_Extent(grid_geom_tmp), source_srid) INTO grid_geom_tmp ;
-
 		END IF;
+		
+		-- Transfrom geom to world wide common cord system for all tables
+		grid_geom_tmp = ST_Transform(grid_geom_tmp,global_srid);
 
 		-- first time grid_geom is null
 		IF grid_geom IS null THEN
-			grid_geom := ST_SetSRID(ST_Extent(grid_geom_tmp), source_srid);
+			grid_geom := ST_SetSRID(ST_Extent(grid_geom_tmp), global_srid);
 		ELSE
 		-- second time take in account tables before
-			grid_geom := ST_SetSRID(ST_Extent(ST_Union(grid_geom, grid_geom_tmp)), source_srid);
+			grid_geom := ST_SetSRID(ST_Extent(ST_Union(grid_geom, grid_geom_tmp)), global_srid);
 		END IF;
 		
 		raise NOTICE 'grid_geom: %',ST_AsText(grid_geom);

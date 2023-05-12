@@ -65,7 +65,12 @@ DECLARE
 	
 	source_srid int; 
 	grid_geom geometry;
-
+	
+	tmp_geom geometry;
+	tmp_srid int;
+	tmp_schema_name VARCHAR;
+	tmp_table_name VARCHAR;
+	tmp_line_schema_table VARCHAR[];
 
 BEGIN
 
@@ -96,16 +101,20 @@ BEGIN
 
 		table_name := line_values[1];
 		geo_column_name := line_values[2];
+
+		SELECT string_to_array(table_name, '.') INTO tmp_line_schema_table;
+
+		tmp_schema_name := tmp_line_schema_table[1];
+		tmp_table_name := tmp_line_schema_table[2];
 	
+		tmp_geom = ST_MakeEnvelope( x_min, y_min, x_max, y_max, source_srid);
+		tmp_srid = Find_SRID(tmp_schema_name,tmp_table_name,geo_column_name);
+		tmp_geom = ST_Transform(tmp_geom,tmp_srid);
+
 		-- Use the && operator 
 		-- We could here use any gis operation we vould like
 		
-		sql := 'SELECT count(*) FROM ' || table_name || ' WHERE ' || geo_column_name || ' && ' 
-		|| 'ST_MakeEnvelope(' || x_min || ',' || y_min || ',' || x_max || ',' || y_max || ',' || source_srid || ')';
-
-
-		raise NOTICE 'execute sql: %',sql;
-		EXECUTE sql INTO num_rows_table_tmp ;
+		EXECUTE Format('SELECT count(*) FROM %1$s WHERE %2$s && %3$L',  table_name, geo_column_name, tmp_geom) INTO num_rows_table_tmp;
 		
 		num_rows_table := num_rows_table +  num_rows_table_tmp;
 
