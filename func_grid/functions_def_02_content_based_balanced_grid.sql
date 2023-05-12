@@ -11,7 +11,7 @@
 -- table_name_column_name_array a list of tables and collums to involve  on the form 
 -- The table name must contain both schema and tablename 
 -- The geo column name must follow with one single space after the table name.
--- Does not handle tables with different srid
+-- Does now handle tables with differentß srid
 -- ARRAY['org_esri_union.table_1 geo_1', 'org_esri_union.table_2 geo_2']
 
 -- Parameter 2 :
