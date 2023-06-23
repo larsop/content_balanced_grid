@@ -30,4 +30,26 @@ cbg_content_based_balanced_grid(ARRAY['org_ar5.ar5_flate geo'],4000))
 ).geom AS cell) AS q_grid;
 
 ```
+This code depends on depends ST_Extent if you data are outside the valid area of projection ST_Extent may return a wrong bbox and then the result from content based grid maybe wrong.
+
+Her is a sample, the pink bbox when we use SRID 25833 and we se that we miss an area up North.
+
+```
+SELECT ST_AsEwkt(ST_SetSrid(ST_Extent(geom),25833)) from   okosystemkart_andre_kart.okonomisk_sone;
+```
+
+Using degrees the greeen bbox locks much more correct.
+
+```
+CREATE TABLE okonomisk_sone_srid_4258 AS TABLE okosystemkart_andre_kart.okonomisk_sone;
+ALTER table okonomisk_sone_srid_4258 ALTER COLUMN geom TYPE  geometry(MultiPolygon,4258) USING ST_transform(geom,4258);
+SELECT ST_AsEwkt(ST_SetSrid(ST_Extent(geom),4258)) from okonomisk_sone_srid_4258;
+```
+
+
+![st_exten_problem](https://github.com/larsop/content_balanced_grid/assets/5681424/cc2f9ede-9ffd-471a-9da8-1f5054406385)
+
+
+
+
 
