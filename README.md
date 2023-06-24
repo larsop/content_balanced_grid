@@ -50,6 +50,10 @@ SELECT ST_AsEwkt(ST_SetSrid(ST_Extent(geom),4258)) from okonomisk_sone_srid_4258
 ![st_exten_problem](https://github.com/larsop/content_balanced_grid/assets/5681424/cc2f9ede-9ffd-471a-9da8-1f5054406385)
 
 
+The reason why we discovered this problem was related to using Postgis Topology and checking linnes where left_face=right_face and found this thick black line,
+
+![st_exten_problem_caused](https://github.com/larsop/content_balanced_grid/assets/5681424/ee0059bc-879c-4386-b137-d8d40d2ad0b2)
+
 
 
 
