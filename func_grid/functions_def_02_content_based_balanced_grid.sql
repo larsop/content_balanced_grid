@@ -24,11 +24,13 @@
 -- max_rows this is the max number rows that intersects with box before it's split into 4 new boxes 
 
 
+
 CREATE OR REPLACE FUNCTION cbg_content_based_balanced_grid (	
 													table_name_column_name_array VARCHAR[], 
 													grid_geom_in geometry,
 													min_distance integer,
-													max_rows integer) RETURNS geometry  AS
+													max_rows integer
+													) RETURNS geometry  AS
 $body$
 DECLARE
 	x_min float;
@@ -153,6 +155,53 @@ END;
 $body$
 LANGUAGE 'plpgsql';
 
+-- Function with default values called with 2 parameters
+
+-- Parameter 1 : An array of tables names and the name of geometry columns.
+-- The table name must contain both schema and table name, The geometry column name must follow with one single space after the table name.
+
+-- Parameter 2 : max_rows this is the max number rows that intersects with box before it's split into 4 new boxes 
+
+-- Parameter 3 : initial_bbox this is used when you need to limit the area you work on. 
+-- Using initial_bbox means not checking the table extent and then trust the initial_bbox
+
+
+CREATE OR REPLACE FUNCTION cbg_content_based_balanced_grid (
+													table_name_column_name_array VARCHAR[],
+													max_rows integer,
+													initial_bbox geometry) 
+													RETURNS geometry  AS
+$body$
+DECLARE
+
+-- sending in a point will cause the table to use table extent
+grid_geom geometry := ST_GeomFromText('POINT(0 0)');
+
+-- set default min distance to 1000 meter
+min_distance integer := 1000;
+
+BEGIN
+
+-- use the area from the user as a bouding box
+IF initial_bbox IS NOT NULL THEN
+  grid_geom := ST_Envelope(initial_bbox);
+END IF;
+
+
+	return cbg_content_based_balanced_grid(
+		table_name_column_name_array,
+		grid_geom, 
+		min_distance,
+		max_rows);
+END;
+$body$
+LANGUAGE 'plpgsql';
+
+
+-- Grant so all can use it
+GRANT EXECUTE ON FUNCTION cbg_content_based_balanced_grid (table_name_column_name_array VARCHAR[],max_rows integer,initial_bbox geometry) to public;
+
+
 -- Grant so all can use it
 GRANT EXECUTE ON FUNCTION cbg_content_based_balanced_grid (	
 													table_name_column_name_array VARCHAR[], 
@@ -162,8 +211,10 @@ GRANT EXECUTE ON FUNCTION cbg_content_based_balanced_grid (
 
 
 -- Function with default values called with 2 parameters
+
 -- Parameter 1 : An array of tables names and the name of geometry columns.
 -- The table name must contain both schema and table name, The geometry column name must follow with one single space after the table name.
+
 -- Parameter 2 : max_rows this is the max number rows that intersects with box before it's split into 4 new boxes 
 
 
@@ -178,6 +229,7 @@ DECLARE
 grid_geom geometry := ST_GeomFromText('POINT(0 0)');
 -- set default min distance to 1000 meter
 min_distance integer := 1000;
+
 
 BEGIN
 	return cbg_content_based_balanced_grid(
