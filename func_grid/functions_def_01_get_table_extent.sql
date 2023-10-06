@@ -77,8 +77,8 @@ BEGIN
 		-- first time grid_geom is null
 		IF grid_geom IS null THEN
 			grid_geom := ST_SetSRID(ST_Extent(grid_geom_tmp), global_srid);
-		ELSE
-		-- second time take in account tables before
+		ELSIF grid_geom_tmp IS NOT NULL THEN
+		    -- second time take in account tables before
 			grid_geom := ST_SetSRID(ST_Extent(ST_Union(grid_geom, grid_geom_tmp)), global_srid);
 		END IF;
 		
